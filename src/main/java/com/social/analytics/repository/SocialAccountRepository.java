@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface SocialAccountRepository extends JpaRepository<SocialAccount, Long> {
     List<SocialAccount> findByCityId(Long cityId);
-    Optional<SocialAccount> findByCityIdAndPlatform(Long cityId, String platform);
+    Optional<SocialAccount> findFirstByCityIdAndPlatform(Long cityId, String platform);
 }

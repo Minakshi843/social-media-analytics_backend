@@ -16,6 +16,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 @SpringBootApplication
 @EnableScheduling
@@ -32,8 +36,22 @@ public class SocialMediaAnalyticsApplication {
                                      PasswordEncoder passwordEncoder,
                                      CityService cityService,
                                      TargetService targetService,
-                                     SocialIntegrationService socialIntegrationService) {
+                                     SocialIntegrationService socialIntegrationService,
+                                     DataSource dataSource) {
         return args -> {
+            // Run native SQL to alter table if columns are missing (PostgreSQL fallback)
+            try (Connection conn = dataSource.getConnection();
+                 Statement stmt = conn.createStatement()) {
+                stmt.execute("ALTER TABLE social_accounts ADD COLUMN IF NOT EXISTS connection_status varchar(50) NOT NULL DEFAULT 'NOT_CONNECTED';");
+                stmt.execute("ALTER TABLE social_accounts ADD COLUMN IF NOT EXISTS account_handle varchar(150);");
+                stmt.execute("ALTER TABLE social_accounts ADD COLUMN IF NOT EXISTS access_token text;");
+                stmt.execute("ALTER TABLE social_accounts ADD COLUMN IF NOT EXISTS refresh_token text;");
+                stmt.execute("ALTER TABLE social_accounts ADD COLUMN IF NOT EXISTS token_expiry timestamp;");
+                stmt.execute("ALTER TABLE social_accounts ADD COLUMN IF NOT EXISTS updated_at timestamp DEFAULT CURRENT_TIMESTAMP;");
+            } catch (SQLException e) {
+                System.err.println("Migration warning: " + e.getMessage());
+            }
+            
             // 1. Create Default Users (Super Admin, Admin, Standard User) if they don't exist
             if (userRepository.findByUsername("superadmin").isEmpty()) {
                 User superadmin = new User("superadmin", "superadmin@analytics.com", passwordEncoder.encode("superadmin123"), "ROLE_SUPERADMIN");

@@ -18,14 +18,33 @@ public class SocialAccount {
     @Column(name = "account_name", nullable = false, length = 150)
     private String accountName;
 
+    @Column(name = "account_handle", length = 150)
+    private String accountHandle;
+
     @Column(name = "account_url", length = 255)
     private String accountUrl;
 
     @Column(nullable = false, length = 50)
     private String platform; // INSTAGRAM, FACEBOOK, LINKEDIN, X
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "connection_status", nullable = false, length = 50)
+    private ConnectionStatus connectionStatus = ConnectionStatus.NOT_CONNECTED;
+
+    @Column(name = "access_token", columnDefinition = "TEXT")
+    private String accessToken;
+
+    @Column(name = "refresh_token", columnDefinition = "TEXT")
+    private String refreshToken;
+
+    @Column(name = "token_expiry")
+    private LocalDateTime tokenExpiry;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     public SocialAccount() {
     }
@@ -35,6 +54,21 @@ public class SocialAccount {
         this.accountName = accountName;
         this.accountUrl = accountUrl;
         this.platform = platform;
+        this.connectionStatus = ConnectionStatus.NOT_CONNECTED;
+    }
+
+    public SocialAccount(City city, String platform, String accountName, String accountHandle, String accountUrl, ConnectionStatus connectionStatus) {
+        this.city = city;
+        this.platform = platform;
+        this.accountName = accountName;
+        this.accountHandle = accountHandle;
+        this.accountUrl = accountUrl;
+        this.connectionStatus = connectionStatus;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -61,6 +95,14 @@ public class SocialAccount {
         this.accountName = accountName;
     }
 
+    public String getAccountHandle() {
+        return accountHandle;
+    }
+
+    public void setAccountHandle(String accountHandle) {
+        this.accountHandle = accountHandle;
+    }
+
     public String getAccountUrl() {
         return accountUrl;
     }
@@ -77,11 +119,51 @@ public class SocialAccount {
         this.platform = platform;
     }
 
+    public ConnectionStatus getConnectionStatus() {
+        return connectionStatus;
+    }
+
+    public void setConnectionStatus(ConnectionStatus connectionStatus) {
+        this.connectionStatus = connectionStatus;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public LocalDateTime getTokenExpiry() {
+        return tokenExpiry;
+    }
+
+    public void setTokenExpiry(LocalDateTime tokenExpiry) {
+        this.tokenExpiry = tokenExpiry;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
